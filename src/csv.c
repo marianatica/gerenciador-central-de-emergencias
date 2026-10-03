@@ -24,7 +24,7 @@ static int separar_campos(char *linha, char campos[][TAM_CAMPO]) {
     int c = 0; // número do campo atual
     int j = 0; // posição dentro do campo atual
 
-    for (int i = 0; linha[i] != '\0' && linha[i] != '\n' && linha[i] != '\r'; i++) {
+    for (int i = 0; linha[i] != '\0' && linha[i] != '\n'; i++) {
         if (linha[i] == ',') {
             campos[c][j] = '\0'; // termina o campo atual
             c++;
@@ -69,13 +69,6 @@ int csv_carregar(const char *caminho, Ocorrencia *vetor, int max) {
             copiar(vetor[lidas].data_hora, campos[5], TAM_DATA);
             copiar(vetor[lidas].regiao, campos[6], TAM_REGIAO);
             copiar(vetor[lidas].endereco, campos[7], TAM_ENDERECO);
-
-            // Campos derivados: são calculados depois.
-            vetor[lidas].prioridade = 0;
-            vetor[lidas].tempo_estimado_min = 0;
-            vetor[lidas].pessoas = 0;
-            vetor[lidas].status = STATUS_PENDENTE;
-            vetor[lidas].equipe[0] = '\0';
 
             lidas++;
         } else {
