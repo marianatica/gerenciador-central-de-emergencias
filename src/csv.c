@@ -4,43 +4,41 @@
 
 #include "csv.h"
 
-#define TAM_LINHA 1000
+#define TAM_LINHA   1000
+#define NUM_COLUNAS 9
+#define TAM_CAMPO   200
 
-// Ordem das colunas no arquivo: lat,lng,desc,zip,title,timeStamp,twp,addr,e
-enum {
-    COL_LAT, COL_LNG, COL_DESC, COL_ZIP, COL_TITLE,
-    COL_TIMESTAMP, COL_TWP, COL_ADDR, COL_E, NUM_COLUNAS
-};
-
-// Separa a linha nas vírgulas, trocando cada vírgula por '\0'. 
-// Retorna quantos campos achou.
-
-static int separar_campos(char *linha, char *campos[]) {
-    int n = 0;
-    char *p = linha;
-
-    while (n < NUM_COLUNAS) {
-        campos[n++] = p; //guarda onde o campo atual começa
-        p = strchr(p, ','); //procua a prox ,
-        if (p == NULL) {
-            break;
-        }
-        *p = '\0'; //troca a, por \0 pra saber onde termina o campo
-        p++;
+// Copia o texto para o campo da struct sem passar do tamanho dele.
+static void copiar(char *destino, char *origem, int tamanho) {
+    int i = 0;
+    while (origem[i] != '\0' && i < tamanho - 1) {
+        destino[i] = origem[i];
+        i++;
     }
-    return n;
+    destino[i] = '\0';
 }
 
-// Converte "2015-12-10 17:10:52" em 20151210171052. Retorna 0 se o formato for inválido.
-static int converter_data(const char *texto, long long *data_hora) {
-    int ano, mes, dia, hora, minuto, segundo;
+// Separa a linha nas vírgulas, guardando cada campo em campos[0], campos[1], ...
+// Um campo vazio (",,") vira um texto vazio, então os campos seguintes não saem do lugar.
+static int separar_campos(char *linha, char campos[][TAM_CAMPO]) {
+    int c = 0; // número do campo atual
+    int j = 0; // posição dentro do campo atual
 
-    if (sscanf(texto, "%d-%d-%d %d:%d:%d", &ano, &mes, &dia, &hora, &minuto, &segundo) != 6) {
-        return 0; //sscanf devolve quantos números conseguiu ler
+    for (int i = 0; linha[i] != '\0' && linha[i] != '\n' && linha[i] != '\r'; i++) {
+        if (linha[i] == ',') {
+            campos[c][j] = '\0'; // termina o campo atual
+            c++;
+            j = 0;
+            if (c == NUM_COLUNAS) {
+                return c + 1; // mais campos que o esperado
+            }
+        } else if (j < TAM_CAMPO - 1) {
+            campos[c][j] = linha[i];
+            j++;
+        }
     }
-    *data_hora = ano * 10000000000LL + mes * 100000000LL + dia * 1000000LL
-               + hora * 10000LL + minuto * 100LL + segundo;
-    return 1;
+    campos[c][j] = '\0';
+    return c + 1;
 }
 
 int csv_carregar(const char *caminho, Ocorrencia *vetor, int max) {
@@ -50,35 +48,45 @@ int csv_carregar(const char *caminho, Ocorrencia *vetor, int max) {
     }
 
     char linha[TAM_LINHA];
-    char *campos[NUM_COLUNAS]; // 9 ponteiros um pra cada campo
+    char campos[NUM_COLUNAS][TAM_CAMPO];
     int lidas = 0;
-    int num_linha = 1; //diz a posicao na linha que deu problema
+    int ignoradas = 0;
 
-    fgets(linha, sizeof linha, arquivo); // pula o cabeçalho
+    fgets(linha, TAM_LINHA, arquivo); // pula o cabeçalho
 
-    while (lidas < max && fgets(linha, sizeof linha, arquivo) != NULL) {
-        num_linha++;
-        linha[strcspn(linha, "\r\n")] = '\0'; // tira a quebra de linha (\n ou \r\n)
+    while (lidas < max && fgets(linha, TAM_LINHA, arquivo) != NULL) {
+        int n = separar_campos(linha, campos);
 
-        Ocorrencia *o = &vetor[lidas]; //faz o o apontar para a próxima posição livre do vetor
-        memset(o, 0, sizeof *o); // zera tudo; 
+        // Colunas do arquivo: lat,lng,desc,zip,title,timeStamp,twp,addr,e
+        // A linha precisa ter os 9 campos e a data no formato AAAA-MM-DD hh:mm:ss
+        if (n == NUM_COLUNAS && strlen(campos[5]) == TAM_DATA - 1) {
+            vetor[lidas].id = lidas + 1;
+            vetor[lidas].lat = atof(campos[0]);
+            vetor[lidas].lng = atof(campos[1]);
+            copiar(vetor[lidas].descricao, campos[2], TAM_DESCRICAO);
+            copiar(vetor[lidas].cep, campos[3], TAM_CEP);
+            copiar(vetor[lidas].tipo, campos[4], TAM_TIPO);
+            copiar(vetor[lidas].data_hora, campos[5], TAM_DATA);
+            copiar(vetor[lidas].regiao, campos[6], TAM_REGIAO);
+            copiar(vetor[lidas].endereco, campos[7], TAM_ENDERECO);
 
-        if (separar_campos(linha, campos) != NUM_COLUNAS || !converter_data(campos[COL_TIMESTAMP], &o->data_hora)) {
-            fprintf(stderr, "Aviso: linha %d do CSV ignorada (formato inválido)\n", num_linha);
-            continue;
+            // Campos derivados: são calculados depois.
+            vetor[lidas].prioridade = 0;
+            vetor[lidas].tempo_estimado_min = 0;
+            vetor[lidas].pessoas = 0;
+            vetor[lidas].status = STATUS_PENDENTE;
+            vetor[lidas].equipe[0] = '\0';
+
+            lidas++;
+        } else {
+            ignoradas++;
         }
-
-        o->id = lidas + 1; //numera as ocorrências 1, 2, 3
-        o->lat = atof(campos[COL_LAT]);
-        o->lng = atof(campos[COL_LNG]);
-        snprintf(o->tipo, sizeof o->tipo, "%s", campos[COL_TITLE]); //snprint e copiar o texto de um campo do CSV para dentro da struct
-        snprintf(o->descricao, sizeof o->descricao, "%s", campos[COL_DESC]);
-        snprintf(o->regiao, sizeof o->regiao, "%s", campos[COL_TWP]);
-        snprintf(o->endereco, sizeof o->endereco, "%s", campos[COL_ADDR]);
-        snprintf(o->cep, sizeof o->cep, "%s", campos[COL_ZIP]);
-        lidas++;
     }
 
     fclose(arquivo);
+
+    if (ignoradas > 0) {
+        printf("Aviso: %d linha(s) do CSV ignorada(s) por formato inválido\n", ignoradas);
+    }
     return lidas;
 }
