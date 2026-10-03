@@ -20,7 +20,7 @@ https://github.com/marianatica/gerenciador-central-de-emergencias
 
 - **Dataset:** 911 Calls – Emergency Dataset 
 - **Link:** https://www.kaggle.com/datasets/mchirico/montcoalert
-- **Registros utilizados:** amostra de 1.000 chamadas, pois o arquivo completo e muito grande
+- **Registros utilizados:** amostra de 150 chamadas, pois o arquivo completo e muito grande
 
 ## Estruturas de dados e algoritmos
 

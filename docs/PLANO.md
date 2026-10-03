@@ -15,7 +15,7 @@ Cada decisão abaixo vem acompanhada da sua justificativa.
 |---|---|
 | Linguagem **C** | É a linguagem da disciplina que temos mais contato, desde AED I. |
 | Dataset **911 Calls** (Kaggle) | É o recomendado pelo enunciado e traz tipo, descrição, região, endereço e data/hora das ocorrências. |
-| Amostra de **1.000 registros** | São 10 vezes o mínimo recomendado (100), e o arquivo completo é muito grande para o GitHub. |
+| Amostra de **150 registros** | Fica acima do mínimo recomendado (100), e o arquivo completo é muito grande para o GitHub. |
 | Interface por **menu no terminal** | O foco da avaliação são as estruturas. Roda em qualquer máquina sem dependências e é simples. |
 
 ## Estruturas escolhidas
@@ -38,7 +38,7 @@ Modos de interação: Investigação, Operação Resgate e Consulta Rápida (rea
 
 ## Próximos passos
 
-1. Baixar o dataset e gerar a amostra de 1.000 registros
+1. Baixar o dataset e gerar a amostra de 150 registros
 2. Definir a estrutura de uma ocorrência e ler o CSV
 3. Implementar a Tabela Hash
 4. Implementar a Árvore B+
