@@ -24,7 +24,7 @@ static int separar_campos(char *linha, char campos[][TAM_CAMPO]) {
     int c = 0; // número do campo atual
     int j = 0; // posição dentro do campo atual
 
-    for (int i = 0; linha[i] != '\0' && linha[i] != '\n' && linha[i] != '\r'; i++) {
+    for (int i = 0; linha[i] != '\0' && linha[i] != '\n'; i++) {
         if (linha[i] == ',') {
             campos[c][j] = '\0'; // termina o campo atual
             c++;
