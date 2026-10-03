@@ -1,0 +1,15 @@
+# Compilação
+*.o
+*.exe
+central
+
+# Cobertura (gcov)
+*.gcda
+*.gcno
+*.gcov
+
+# Dataset completo (grande demais para o GitHub; comitamos só a amostra)
+data/911.csv
+
+# Gerado em tempo de execução
+data/base_exportada.csv
