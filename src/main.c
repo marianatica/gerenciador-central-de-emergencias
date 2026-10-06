@@ -1,12 +1,15 @@
 #include <stdio.h>
 
-#include "csv.h"
-#include "hash.h"
-#include "indices.h"
-#include "central.h"
-#include "consultas.h"
-#include "integridade.h"
-#include "entrada.h"
+// O programa inteiro é compilado a partir deste arquivo: o código de cada módulo (.c) é incluído aqui.
+// Para compilar, basta a main:  gcc -Iinclude src/main.c -o central
+#include "csv.c"
+#include "hash.c"
+#include "btree.c"
+#include "indices.c"
+#include "entrada.c"
+#include "central.c"
+#include "consultas.c"
+#include "integridade.c"
 
 #ifdef _WIN32
 #include <windows.h>
