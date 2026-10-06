@@ -32,6 +32,5 @@ void hash_liberar(TabelaHash *tabela);
 unsigned long hash_calcular_assinatura(Ocorrencia *o);
 int hash_registrar_alteracao(TabelaHash *tabela, int id);
 int hash_foi_alterada(TabelaHash *tabela, int id);
-void hash_estatisticas(TabelaHash *tabela);
 
 #endif

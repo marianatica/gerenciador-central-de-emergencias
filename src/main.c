@@ -5,6 +5,7 @@
 #include "indices.h"
 #include "central.h"
 #include "consultas.h"
+#include "integridade.h"
 #include "entrada.h"
 
 #ifdef _WIN32
@@ -59,7 +60,9 @@ int main(void) {
             consulta_rapida_menu(&tabela, &indices);
         } else if (opcao == 3) {
             organizacao_menu(&tabela, &indices);
-        } else if (opcao == 4 || opcao == 5) {
+        } else if (opcao == 4) {
+            integridade_menu(&tabela, ARQUIVO_DADOS);
+        } else if (opcao == 5) {
             printf("Módulo em construção.\n");
         } else if (opcao != 0) {
             printf("Opção inválida.\n");

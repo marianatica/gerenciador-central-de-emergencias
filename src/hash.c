@@ -180,30 +180,3 @@ int hash_foi_alterada(TabelaHash *tabela, int id) {
     }
     return 0;
 }
-
-// Mostra como as ocorrências estão espalhadas na tabela.
-void hash_estatisticas(TabelaHash *tabela) {
-    int ocupadas = 0;
-    int maior_lista = 0;
-
-    for (int i = 0; i < TAM_TABELA; i++) {
-        int tamanho = 0;
-        No *atual = tabela->posicoes[i];
-        while (atual != NULL) {
-            tamanho++;
-            atual = atual->proximo;
-        }
-        if (tamanho > 0) {
-            ocupadas++;
-        }
-        if (tamanho > maior_lista) {
-            maior_lista = tamanho;
-        }
-    }
-
-    printf("Tamanho da tabela: %d posicoes\n", TAM_TABELA);
-    printf("Ocorrencias guardadas: %d\n", tabela->quantidade);
-    printf("Posicoes ocupadas: %d | vazias: %d\n", ocupadas, TAM_TABELA - ocupadas);
-    printf("Fator de carga: %.2f\n", (double)tabela->quantidade / TAM_TABELA);
-    printf("Maior lista (ocorrencias na mesma posicao): %d\n", maior_lista);
-}
