@@ -4,8 +4,8 @@
 #include "ocorrencia.h"
 #include "btree.h"
 
-// Índices das ocorrências: uma Árvore B+ para cada campo usado nas consultas.
-// Cada árvore guarda (valor do campo, id) em ordem; a ocorrência completa fica na tabela hash.
+// Indices das ocorrencias: uma Arvore B+ para cada campo usado nas consultas.
+// Cada arvore guarda (valor do campo, id) em ordem; a ocorrencia completa fica na tabela hash.
 typedef struct {
     ArvoreBMais tipo;
     ArvoreBMais regiao;

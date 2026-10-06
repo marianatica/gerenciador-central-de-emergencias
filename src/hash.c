@@ -7,7 +7,7 @@ static int calcular_posicao(int id) {
     return id % TAM_TABELA;
 }
 
-// Deixa todas as posições vazias.
+// Deixa todas as posicoes vazias.
 void hash_inicializar(TabelaHash *tabela) {
     for (int i = 0; i < TAM_TABELA; i++) {
         tabela->posicoes[i] = NULL;
@@ -16,8 +16,8 @@ void hash_inicializar(TabelaHash *tabela) {
     tabela->comparacoes = 0;
 }
 
-// Procura o nó que guarda o id e conta quantas ocorrências precisou olhar.
-// Retorna o nó, ou NULL se o id não existe.
+// Procura o no que guarda o id e conta quantas ocorrencias precisou olhar.
+// Retorna o no, ou NULL se o id nao existe.
 static No *buscar_no(TabelaHash *tabela, int id) {
     No *atual = tabela->posicoes[calcular_posicao(id)];
     tabela->comparacoes = 0;
@@ -32,10 +32,10 @@ static No *buscar_no(TabelaHash *tabela, int id) {
     return NULL;
 }
 
-// Retorna 1 se inseriu ou 0 se já existe uma ocorrência com esse id.
+// Retorna 1 se inseriu ou 0 se ja existe uma ocorrencia com esse id.
 int hash_inserir(TabelaHash *tabela, Ocorrencia ocorrencia) {
     if (hash_buscar(tabela, ocorrencia.id) != NULL) {
-        return 0; // o id não pode se repetir
+        return 0; // o id nao pode se repetir
     }
 
     No *novo = malloc(sizeof(No));
@@ -45,15 +45,15 @@ int hash_inserir(TabelaHash *tabela, Ocorrencia ocorrencia) {
 
     int pos = calcular_posicao(ocorrencia.id);
     novo->ocorrencia = ocorrencia;
-    novo->assinatura = hash_calcular_assinatura(&novo->ocorrencia); // "lacre" do conteúdo no momento da inserção
+    novo->assinatura = hash_calcular_assinatura(&novo->ocorrencia); // "lacre" do conteudo no momento da insercao
     novo->versao = 1;
-    novo->proximo = tabela->posicoes[pos]; // o novo entra no começo da lista
+    novo->proximo = tabela->posicoes[pos]; // o novo entra no comeco da lista
     tabela->posicoes[pos] = novo;
     tabela->quantidade++;
     return 1;
 }
 
-// Retorna o endereço da ocorrência dentro da tabela, ou NULL se o id não existe.
+// Retorna o endereco da ocorrencia dentro da tabela, ou NULL se o id nao existe.
 Ocorrencia *hash_buscar(TabelaHash *tabela, int id) {
     No *no = buscar_no(tabela, id);
     if (no == NULL) {
@@ -62,7 +62,7 @@ Ocorrencia *hash_buscar(TabelaHash *tabela, int id) {
     return &no->ocorrencia;
 }
 
-// Retorna 1 se removeu, ou 0 se o id não existe.
+// Retorna 1 se removeu, ou 0 se o id nao existe.
 int hash_remover(TabelaHash *tabela, int id) {
     int pos = calcular_posicao(id);
     No *atual = tabela->posicoes[pos];
@@ -73,7 +73,7 @@ int hash_remover(TabelaHash *tabela, int id) {
             if (anterior == NULL) {
                 tabela->posicoes[pos] = atual->proximo; // era o primeiro da lista
             } else {
-                anterior->proximo = atual->proximo; // liga o anterior ao próximo, pulando o removido
+                anterior->proximo = atual->proximo; // liga o anterior ao proximo, pulando o removido
             }
             free(atual);
             tabela->quantidade--;
@@ -85,7 +85,7 @@ int hash_remover(TabelaHash *tabela, int id) {
     return 0;
 }
 
-// Mostra todas as ocorrências, percorrendo as posições da tabela uma a uma.
+// Mostra todas as ocorrencias, percorrendo as posicoes da tabela uma a uma.
 void hash_listar(TabelaHash *tabela) {
     for (int i = 0; i < TAM_TABELA; i++) {
         No *atual = tabela->posicoes[i];
@@ -95,11 +95,11 @@ void hash_listar(TabelaHash *tabela) {
             atual = atual->proximo;
         }
     }
-    printf("Total: %d ocorrência(s)\n", tabela->quantidade);
+    printf("Total: %d ocorrencia(s)\n", tabela->quantidade);
 }
 
-// Guarda em ids os ids de todas as ocorrências (na ordem das posições da tabela) e retorna quantos.
-// Usada pelas buscas sequenciais, que precisam olhar todas as ocorrências uma a uma.
+// Guarda em ids os ids de todas as ocorrencias (na ordem das posicoes da tabela) e retorna quantos.
+// Usada pelas buscas sequenciais, que precisam olhar todas as ocorrencias uma a uma.
 int hash_todos_ids(TabelaHash *tabela, int *ids, int max) {
     int total = 0;
     for (int i = 0; i < TAM_TABELA; i++) {
@@ -115,7 +115,7 @@ int hash_todos_ids(TabelaHash *tabela, int *ids, int max) {
     return total;
 }
 
-// Libera a memória de todos os itens da tabela.
+// Libera a memoria de todos os itens da tabela.
 void hash_liberar(TabelaHash *tabela) {
     for (int i = 0; i < TAM_TABELA; i++) {
         No *atual = tabela->posicoes[i];
@@ -129,10 +129,10 @@ void hash_liberar(TabelaHash *tabela) {
     tabela->quantidade = 0;
 }
 
-// ---------- Integridade (Módulo 4) ----------
+// ---------- Integridade (Modulo 4) ----------
 
 // Continua a conta da assinatura com as letras de um texto (algoritmo djb2: h = h * 33 + letra).
-// O '|' no final separa um campo do outro, para "AB" + "C" não dar o mesmo que "A" + "BC".
+// O '|' no final separa um campo do outro, para "AB" + "C" nao dar o mesmo que "A" + "BC".
 static unsigned long misturar_texto(unsigned long h, char *texto) {
     for (int i = 0; texto[i] != '\0'; i++) {
         h = h * 33 + texto[i];
@@ -140,7 +140,7 @@ static unsigned long misturar_texto(unsigned long h, char *texto) {
     return h * 33 + '|';
 }
 
-// Assinatura: um número calculado a partir de todo o conteúdo da ocorrência
+// Assinatura: um numero calculado a partir de todo o conteudo da ocorrencia
 unsigned long hash_calcular_assinatura(Ocorrencia *o) {
     unsigned long h = 5381;
 
@@ -150,14 +150,14 @@ unsigned long hash_calcular_assinatura(Ocorrencia *o) {
     h = misturar_texto(h, o->endereco);
     h = misturar_texto(h, o->cep);
     h = misturar_texto(h, o->data_hora);
-    // as coordenadas entram como números inteiros (6 casas decimais)
+    // as coordenadas entram como numeros inteiros (6 casas decimais)
     h = h * 33 + (long)(o->lat * 1000000);
     h = h * 33 + (long)(o->lng * 1000000);
     return h;
 }
 
-// Alteração autorizada feita pelo menu: guarda a nova assinatura e aumenta a versão.
-// Retorna 1 se registrou, ou 0 se o id não existe.
+// Alteracao autorizada feita pelo menu: guarda a nova assinatura e aumenta a versao.
+// Retorna 1 se registrou, ou 0 se o id nao existe.
 int hash_registrar_alteracao(TabelaHash *tabela, int id) {
     No *no = buscar_no(tabela, id);
     if (no == NULL) {
@@ -168,8 +168,8 @@ int hash_registrar_alteracao(TabelaHash *tabela, int id) {
     return 1;
 }
 
-// Compara o conteúdo atual com a assinatura guardada.
-// Retorna 1 se foi alterada sem registro, 0 se está íntegra, ou -1 se o id não existe.
+// Compara o conteudo atual com a assinatura guardada.
+// Retorna 1 se foi alterada sem registro, 0 se esta integra, ou -1 se o id nao existe.
 int hash_foi_alterada(TabelaHash *tabela, int id) {
     No *no = buscar_no(tabela, id);
     if (no == NULL) {

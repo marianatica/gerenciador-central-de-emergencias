@@ -3,8 +3,8 @@
 
 #include "hash.h"
 
-// Módulo 4 – Integridade dos Registros (Modo Investigação).
-// arquivo é o CSV de onde as ocorrências foram carregadas, usado para comparar com a memória.
+// Modulo 4 - Integridade dos Registros (Modo Investigacao).
+// arquivo e o CSV de onde as ocorrencias foram carregadas, usado para comparar com a memoria.
 void integridade_menu(TabelaHash *tabela, char *arquivo);
 
 #endif
