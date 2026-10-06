@@ -275,21 +275,7 @@ int btree_remover(ArvoreBMais *arvore, char *chave, int id) {
     return 0;
 }
 
-// ---------- Altura e liberar ----------
-
-// Quantos níveis a árvore tem (todas as folhas estão no mesmo nível).
-int btree_altura(ArvoreBMais *arvore) {
-    int altura = 0;
-    NoBMais *no = arvore->raiz;
-    while (no != NULL) {
-        altura++;
-        if (no->folha) {
-            break;
-        }
-        no = no->filhos[0];
-    }
-    return altura;
-}
+// ---------- Liberar ----------
 
 static void liberar_no(NoBMais *no) {
     if (no == NULL) {
