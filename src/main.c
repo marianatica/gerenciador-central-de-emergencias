@@ -2,7 +2,9 @@
 
 #include "csv.h"
 #include "hash.h"
+#include "indices.h"
 #include "central.h"
+#include "consultas.h"
 #include "entrada.h"
 
 #ifdef _WIN32
@@ -20,16 +22,21 @@ int main(void) {
     // static: o vetor é grande (cerca de 400 KB) e assim fica fora da pilha da função.
     static Ocorrencia lidas[MAX_OCORRENCIAS];
     TabelaHash tabela;
+    Indices indices;
 
-    // Carregar os registros iniciais: lê o CSV e guarda cada ocorrência na tabela hash.
+    // Carregar os registros iniciais: lê o CSV e guarda cada ocorrência na tabela hash
+    // e nas árvores B+ (índices por tipo, região e data).
     int n = csv_carregar(ARQUIVO_DADOS, lidas, MAX_OCORRENCIAS);
     if (n == -1) {
         printf("Erro: não foi possível abrir o arquivo %s\n", ARQUIVO_DADOS);
         return 1;
     }
     hash_inicializar(&tabela);
+    indices_inicializar(&indices);
     for (int i = 0; i < n; i++) {
-        hash_inserir(&tabela, lidas[i]);
+        if (hash_inserir(&tabela, lidas[i])) {
+            indices_adicionar(&indices, &lidas[i]);
+        }
     }
     printf("%d ocorrências carregadas de %s\n", tabela.quantidade, ARQUIVO_DADOS);
 
@@ -47,14 +54,19 @@ int main(void) {
         opcao = ler_inteiro("Opção: ");
 
         if (opcao == 1) {
-            central_menu(&tabela, &proximo_id);
-        } else if (opcao >= 2 && opcao <= 5) {
+            central_menu(&tabela, &indices, &proximo_id);
+        } else if (opcao == 2) {
+            consulta_rapida_menu(&tabela, &indices);
+        } else if (opcao == 3) {
+            organizacao_menu(&tabela, &indices);
+        } else if (opcao == 4 || opcao == 5) {
             printf("Módulo em construção.\n");
         } else if (opcao != 0) {
             printf("Opção inválida.\n");
         }
     }
 
+    indices_liberar(&indices);
     hash_liberar(&tabela);
     printf("Até logo!\n");
     return 0;

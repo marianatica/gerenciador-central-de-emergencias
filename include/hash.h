@@ -26,6 +26,7 @@ int hash_inserir(TabelaHash *tabela, Ocorrencia ocorrencia);
 Ocorrencia *hash_buscar(TabelaHash *tabela, int id);
 int hash_remover(TabelaHash *tabela, int id);
 void hash_listar(TabelaHash *tabela);
+int hash_todos_ids(TabelaHash *tabela, int *ids, int max);
 void hash_liberar(TabelaHash *tabela);
 
 unsigned long hash_calcular_assinatura(Ocorrencia *o);
