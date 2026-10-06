@@ -43,7 +43,7 @@ Ao abrir, o sistema carrega as ocorrências do CSV e mostra o menu principal, co
 | Fonte | **911 Calls – Emergency Dataset** (Montgomery County, Pensilvânia, EUA), publicado no Kaggle |
 | Link | https://www.kaggle.com/datasets/mchirico/montcoalert |
 | Arquivo usado | `data/ocorrencias_911.csv` |
-| Registros | **150**: as 150 primeiras chamadas do arquivo `911.csv` (de 10/12/2015 às 17h até 11/12/2015 às 6h) |
+| Registros | **150**: as 150 primeiras chamadas do arquivo `911.csv` |
 
 **Campos utilizados** (todos vêm direto do dataset):
 
