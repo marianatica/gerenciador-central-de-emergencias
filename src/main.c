@@ -1,12 +1,16 @@
 #include <stdio.h>
 
-#include "csv.h"
-#include "hash.h"
-#include "indices.h"
-#include "central.h"
-#include "consultas.h"
-#include "integridade.h"
-#include "entrada.h"
+// Para compilar:  gcc -Iinclude src/main.c -o central
+
+#include "csv.c"
+#include "hash.c"
+#include "btree.c"
+#include "indices.c"
+#include "entrada.c"
+#include "central.c"
+#include "consultas.c"
+#include "integridade.c"
+#include "greedy.c"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -63,7 +67,7 @@ int main(void) {
         } else if (opcao == 4) {
             integridade_menu(&tabela, ARQUIVO_DADOS);
         } else if (opcao == 5) {
-            printf("Módulo em construção.\n");
+            greedy_menu(&tabela, &indices);
         } else if (opcao != 0) {
             printf("Opção inválida.\n");
         }
