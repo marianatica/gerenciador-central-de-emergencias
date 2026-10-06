@@ -22,7 +22,7 @@ void ler_texto(char *mensagem, char *texto, int tamanho) {
         texto[i] = '\0'; // tira o Enter
     } else {
         // A pessoa digitou mais do que cabe: descarta o resto da linha,
-        // senão ele seria lido como a resposta da próxima pergunta.
+        // senao ele seria lido como a resposta da proxima pergunta.
         int c = getchar();
         while (c != '\n' && c != EOF) {
             c = getchar();
@@ -30,7 +30,7 @@ void ler_texto(char *mensagem, char *texto, int tamanho) {
     }
 }
 
-// Diz se o texto é um número inteiro (só dígitos, com um '-' opcional no começo).
+// Diz se o texto e um numero inteiro (so digitos, com um '-' opcional no comeco).
 static int eh_inteiro(char *texto) {
     int i = 0;
     if (texto[0] == '-') {
@@ -48,7 +48,7 @@ static int eh_inteiro(char *texto) {
     return 1;
 }
 
-// Diz se o texto é um número com casas decimais (dígitos, no máximo um '.', '-' opcional).
+// Diz se o texto e um numero com casas decimais (digitos, no maximo um '.', '-' opcional).
 static int eh_decimal(char *texto) {
     int i = 0;
     int pontos = 0;
@@ -83,7 +83,7 @@ int ler_inteiro(char *mensagem) {
         if (feof(stdin)) {
             return 0; // a entrada acabou: devolve 0 (que nos menus significa "voltar")
         }
-        printf("Digite um número inteiro.\n");
+        printf("Digite um numero inteiro.\n");
     }
 }
 
@@ -98,6 +98,6 @@ double ler_decimal(char *mensagem) {
         if (feof(stdin)) {
             return 0;
         }
-        printf("Digite um número, usando ponto nas casas decimais (ex.: -75.34).\n");
+        printf("Digite um numero, usando ponto nas casas decimais (ex.: -75.34).\n");
     }
 }

@@ -18,11 +18,11 @@ static void copiar(char *destino, char *origem, int tamanho) {
     destino[i] = '\0';
 }
 
-// Separa a linha nas vírgulas, guardando cada campo em campos[0], campos[1], ...
-// Um campo vazio (",,") vira um texto vazio, então os campos seguintes não saem do lugar.
+// Separa a linha nas virgulas, guardando cada campo em campos[0], campos[1], ...
+// Um campo vazio (",,") vira um texto vazio, entao os campos seguintes nao saem do lugar.
 static int separar_campos(char *linha, char campos[][TAM_CAMPO]) {
-    int c = 0; // número do campo atual
-    int j = 0; // posição dentro do campo atual
+    int c = 0; // numero do campo atual
+    int j = 0; // posicao dentro do campo atual
 
     for (int i = 0; linha[i] != '\0' && linha[i] != '\n'; i++) {
         if (linha[i] == ',') {
@@ -52,7 +52,7 @@ int csv_carregar(const char *caminho, Ocorrencia *vetor, int max) {
     int lidas = 0;
     int ignoradas = 0;
 
-    fgets(linha, TAM_LINHA, arquivo); // pula o cabeçalho
+    fgets(linha, TAM_LINHA, arquivo); // pula o cabecalho
 
     while (lidas < max && fgets(linha, TAM_LINHA, arquivo) != NULL) {
         int n = separar_campos(linha, campos);
@@ -79,7 +79,7 @@ int csv_carregar(const char *caminho, Ocorrencia *vetor, int max) {
     fclose(arquivo);
 
     if (ignoradas > 0) {
-        printf("Aviso: %d linha(s) do CSV ignorada(s) por formato inválido\n", ignoradas);
+        printf("Aviso: %d linha(s) do CSV ignorada(s) por formato invalido\n", ignoradas);
     }
     return lidas;
 }

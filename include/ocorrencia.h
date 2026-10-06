@@ -9,7 +9,7 @@
 #define TAM_DATA      20   // "2015-12-10 17:10:52": 19 caracteres + '\0'
 
 typedef struct {
-    int id;                        // número da linha no CSV (o dataset não tem identificador)
+    int id;                        // numero da linha no CSV (o dataset nao tem identificador)
     char tipo[TAM_TIPO];           // title
     char descricao[TAM_DESCRICAO]; // desc
     char regiao[TAM_REGIAO];       // twp

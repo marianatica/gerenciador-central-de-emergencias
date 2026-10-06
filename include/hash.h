@@ -3,22 +3,22 @@
 
 #include "ocorrencia.h"
 
-// Menor número primo que deixa o fator de carga abaixo de 0,7 com as 150 ocorrências:
+// Menor numero primo que deixa o fator de carga abaixo de 0,7 com as 150 ocorrencias:
 // 150 / 223 = 0,67 
 
 #define TAM_TABELA 223
 
 typedef struct No {
     Ocorrencia ocorrencia;
-    unsigned long assinatura; // número calculado a partir do conteúdo (Módulo 4: integridade)
-    int versao;               // começa em 1 e aumenta a cada alteração feita pelo sistema
+    unsigned long assinatura; // numero calculado a partir do conteudo (Modulo 4: integridade)
+    int versao;               // comeca em 1 e aumenta a cada alteracao feita pelo sistema
     struct No *proximo;
 } No;
 
 typedef struct {
-    No *posicoes[TAM_TABELA]; // cada posição aponta para o começo de uma lista
-    int quantidade;           // quantas ocorrências estão guardadas
-    int comparacoes;          // quantas ocorrências a última busca precisou olhar
+    No *posicoes[TAM_TABELA]; // cada posicao aponta para o comeco de uma lista
+    int quantidade;           // quantas ocorrencias estao guardadas
+    int comparacoes;          // quantas ocorrencias a ultima busca precisou olhar
 } TabelaHash;
 
 void hash_inicializar(TabelaHash *tabela);
