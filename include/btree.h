@@ -31,7 +31,6 @@ void btree_inserir(ArvoreBMais *arvore, char *chave, int id);
 int btree_buscar_faixa(ArvoreBMais *arvore, char *inicio, char *fim, int *ids, int max);
 int btree_buscar_prefixo(ArvoreBMais *arvore, char *prefixo, int *ids, int max);
 int btree_remover(ArvoreBMais *arvore, char *chave, int id);
-int btree_altura(ArvoreBMais *arvore);
 void btree_liberar(ArvoreBMais *arvore);
 
 #endif
