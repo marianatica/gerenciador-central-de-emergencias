@@ -98,6 +98,23 @@ void hash_listar(TabelaHash *tabela) {
     printf("Total: %d ocorrência(s)\n", tabela->quantidade);
 }
 
+// Guarda em ids os ids de todas as ocorrências (na ordem das posições da tabela) e retorna quantos.
+// Usada pelas buscas sequenciais, que precisam olhar todas as ocorrências uma a uma.
+int hash_todos_ids(TabelaHash *tabela, int *ids, int max) {
+    int total = 0;
+    for (int i = 0; i < TAM_TABELA; i++) {
+        No *atual = tabela->posicoes[i];
+        while (atual != NULL) {
+            if (total < max) {
+                ids[total] = atual->ocorrencia.id;
+                total++;
+            }
+            atual = atual->proximo;
+        }
+    }
+    return total;
+}
+
 // Libera a memória de todos os itens da tabela.
 void hash_liberar(TabelaHash *tabela) {
     for (int i = 0; i < TAM_TABELA; i++) {

@@ -19,6 +19,15 @@ void central_mostrar_ocorrencia(Ocorrencia *o) {
     printf("Local:     %.6f, %.6f\n", o->lat, o->lng);
 }
 
+void central_mostrar_lista(TabelaHash *tabela, int *ids, int quantidade) {
+    for (int i = 0; i < quantidade; i++) {
+        Ocorrencia *o = hash_buscar(tabela, ids[i]);
+        if (o != NULL) {
+            printf("%4d | %s | %-30s | %s\n", o->id, o->data_hora, o->tipo, o->regiao);
+        }
+    }
+}
+
 // Confere o formato "AAAA-MM-DD hh:mm:ss": separadores no lugar certo e dígitos no resto.
 static int data_valida(char *data) {
     if (strlen(data) != TAM_DATA - 1) {
@@ -55,7 +64,7 @@ static int ler_id(void) {
     return id;
 }
 
-static void cadastrar(TabelaHash *tabela, int *proximo_id) {
+static void cadastrar(TabelaHash *tabela, Indices *indices, int *proximo_id) {
     Ocorrencia nova;
 
     printf("\n--- Cadastrar ocorrência ---\n");
@@ -78,6 +87,7 @@ static void cadastrar(TabelaHash *tabela, int *proximo_id) {
     nova.lng = ler_decimal("Longitude (ex.: -75.34): ");
 
     if (hash_inserir(tabela, nova)) {
+        indices_adicionar(indices, &nova); // a nova ocorrência também entra nas árvores B+
         printf("Ocorrência cadastrada com o id %d.\n", nova.id);
         *proximo_id = *proximo_id + 1;
     } else {
@@ -101,7 +111,7 @@ static void consultar(TabelaHash *tabela) {
     printf("(a tabela hash precisou olhar %d ocorrência(s) para encontrar)\n", tabela->comparacoes);
 }
 
-static void alterar(TabelaHash *tabela) {
+static void alterar(TabelaHash *tabela, Indices *indices) {
     printf("\n--- Alterar ocorrência ---\n");
     int id = ler_id();
     if (id == 0) {
@@ -114,6 +124,7 @@ static void alterar(TabelaHash *tabela) {
         return;
     }
     central_mostrar_ocorrencia(o);
+    Ocorrencia antiga = *o; // guarda os valores de antes, para tirar das árvores B+
 
     printf("\nQual campo deseja alterar?\n");
     printf("1 - Tipo\n2 - Descrição\n3 - Região\n4 - Endereço\n5 - CEP\n6 - Data/hora\n0 - Cancelar\n");
@@ -142,12 +153,16 @@ static void alterar(TabelaHash *tabela) {
         return;
     }
 
+    // As árvores B+ trocam o valor antigo pelo novo, para as consultas não acharem o valor velho.
+    indices_remover(indices, &antiga);
+    indices_adicionar(indices, o);
+
     // Alteração autorizada: a hash guarda a nova assinatura do conteúdo e aumenta a versão.
     hash_registrar_alteracao(tabela, id);
     printf("Ocorrência %d alterada.\n", id);
 }
 
-static void remover(TabelaHash *tabela) {
+static void remover(TabelaHash *tabela, Indices *indices) {
     printf("\n--- Remover ocorrência ---\n");
     int id = ler_id();
     if (id == 0) {
@@ -166,11 +181,12 @@ static void remover(TabelaHash *tabela) {
         printf("Remoção cancelada.\n");
         return;
     }
+    indices_remover(indices, o); // tira das árvores B+ antes de apagar da hash
     hash_remover(tabela, id);
     printf("Ocorrência %d removida.\n", id);
 }
 
-void central_menu(TabelaHash *tabela, int *proximo_id) {
+void central_menu(TabelaHash *tabela, Indices *indices, int *proximo_id) {
     int opcao = -1;
 
     while (opcao != 0) {
@@ -184,13 +200,13 @@ void central_menu(TabelaHash *tabela, int *proximo_id) {
         opcao = ler_inteiro("Opção: ");
 
         if (opcao == 1) {
-            cadastrar(tabela, proximo_id);
+            cadastrar(tabela, indices, proximo_id);
         } else if (opcao == 2) {
             consultar(tabela);
         } else if (opcao == 3) {
-            alterar(tabela);
+            alterar(tabela, indices);
         } else if (opcao == 4) {
-            remover(tabela);
+            remover(tabela, indices);
         } else if (opcao == 5) {
             printf("\n--- Ocorrências ---\n");
             hash_listar(tabela);
