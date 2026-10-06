@@ -10,12 +10,15 @@
 
 typedef struct No {
     Ocorrencia ocorrencia;
+    unsigned long assinatura; // número calculado a partir do conteúdo (Módulo 4: integridade)
+    int versao;               // começa em 1 e aumenta a cada alteração feita pelo sistema
     struct No *proximo;
 } No;
 
 typedef struct {
     No *posicoes[TAM_TABELA]; // cada posição aponta para o começo de uma lista
     int quantidade;           // quantas ocorrências estão guardadas
+    int comparacoes;          // quantas ocorrências a última busca precisou olhar
 } TabelaHash;
 
 void hash_inicializar(TabelaHash *tabela);
@@ -24,5 +27,10 @@ Ocorrencia *hash_buscar(TabelaHash *tabela, int id);
 int hash_remover(TabelaHash *tabela, int id);
 void hash_listar(TabelaHash *tabela);
 void hash_liberar(TabelaHash *tabela);
+
+unsigned long hash_calcular_assinatura(Ocorrencia *o);
+int hash_registrar_alteracao(TabelaHash *tabela, int id);
+int hash_foi_alterada(TabelaHash *tabela, int id);
+void hash_estatisticas(TabelaHash *tabela);
 
 #endif
