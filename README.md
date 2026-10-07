@@ -89,61 +89,54 @@ Ao abrir, o sistema carrega as ocorrências do CSV e mostra o menu principal, co
 
 ## Estruturas de dados e algoritmos
 
-Das quatro técnicas do enunciado, foram implementadas **Tabela Hash**, **Árvore B+** e **Algoritmo Guloso**, todas do zero, sem bibliotecas prontas.
+Das quatro técnicas do enunciado, escolhemos a **Tabela Hash**, a **Árvore B+** e o **Algoritmo Guloso**, e implementamos as três do zero, sem bibliotecas prontas. Cada uma resolve um problema diferente da central.
 
 ### Tabela Hash (`src/hash.c`)
 
-**Onde é usada:** é o armazenamento principal das ocorrências (Módulo 1), a busca por id (Módulo 2) e a base da verificação de integridade (Módulo 4).
+Usamos a Tabela Hash para guardar as ocorrências (Módulo 1), para a busca por id (Módulo 2) e como base da verificação de integridade (Módulo 4).
 
-**Como funciona:** a posição de cada ocorrência é `id % 223`. Ocorrências que caem na mesma posição ficam numa lista ligada (encadeamento), e a nova entra no começo da lista.
+Escolhemos a hash porque quase tudo no Módulo 1 começa por achar uma ocorrência pelo id: consultar, alterar e remover. Numa lista ou num vetor, seria preciso olhar as ocorrências uma a uma até achar o id (busca sequencial), que é justamente o problema que o enunciado descreve. Na hash, uma conta (`id % 223`) diz em que posição a ocorrência está, e a busca vai direto até ela, em tempo constante no caso médio.
 
-| Decisão | Justificativa |
-|---|---|
-| Tabela Hash para guardar as ocorrências | consultar, alterar e remover começam por achar a ocorrência pelo id. A hash vai direto à posição certa, em tempo constante no caso médio, em vez de fazer uma busca sequencial |
-| **223 posições** | é o menor número primo que deixa o fator de carga abaixo de 0,7 com as 150 ocorrências (150 / 223 = 0,67). Com fator de carga baixo, as listas ficam curtas; e um tamanho primo espalha melhor os restos da divisão |
-| **Encadeamento** (e não endereçamento aberto) | o Módulo 1 exige remover: no encadeamento, a remoção é física, sem precisar de marcas de "removido" (lápides). A tabela também nunca "enche" com novos cadastros, e uma colisão não ocupa as posições vizinhas |
-| **Assinatura do conteúdo** com a função **djb2** (`h = 5381`; para cada letra, `h = h * 33 + letra`) | é o identificador baseado no conteúdo exigido pelo Módulo 4: qualquer letra diferente muda o número. O id fica fora da conta, para que duas ocorrências com o mesmo conteúdo tenham a mesma assinatura (duplicatas) |
+Escolhemos 223 posições porque é o menor número primo que deixa o fator de carga abaixo de 0,7 com as 150 ocorrências (150 / 223 = 0,67). Com a tabela menos cheia, quase toda posição guarda no máximo uma ocorrência, e a busca continua rápida. O tamanho é primo porque um primo não tem divisores em comum com padrões nos ids, então os restos da divisão se espalham melhor pela tabela.
+
+Quando dois ids caem na mesma posição (colisão), usamos encadeamento: cada posição tem uma lista ligada, e a ocorrência nova entra no começo dela. Escolhemos o encadeamento, e não o endereçamento aberto, porque o Módulo 1 exige remover ocorrências. No encadeamento, a remoção é simples: o nó sai da lista e a memória é liberada. No endereçamento aberto, seria preciso deixar uma marca de "removido" (lápide) para não quebrar as buscas. Além disso, com encadeamento a tabela nunca enche com novos cadastros, e uma colisão não ocupa a posição vizinha.
+
+Para o Módulo 4, a hash também guarda a assinatura de cada ocorrência, que é o identificador baseado no conteúdo pedido pelo enunciado. Ela é calculada com a função djb2, que começa em 5381 e, para cada letra de todos os campos, faz `h = h * 33 + letra`. Escolhemos a djb2 porque é simples de implementar à mão e qualquer letra diferente muda o resultado. Deixamos o id fora da conta para que duas ocorrências com o mesmo conteúdo tenham a mesma assinatura, e assim dá para achar duplicatas.
 
 ### Árvore B+ (`src/btree.c`)
 
-**Onde é usada:** três árvores servem de índice por **tipo**, **região** e **data** (Módulos 2 e 3, e a restrição por região do Módulo 5). Uma árvore temporária é usada no Módulo 4 para encontrar duplicatas e conflitos.
+Usamos três Árvores B+ como índices, por tipo, região e data (Módulos 2 e 3 e a restrição por região do Módulo 5), e uma árvore temporária no Módulo 4 para achar duplicatas e conflitos.
 
-**Como funciona:** cada nó guarda até `m = 4` chaves em ordem. Os nós internos só orientam o caminho, e os dados ficam nas folhas, que são ligadas em sequência. Cada entrada é um par (texto, id), e a ocorrência completa continua na Tabela Hash. Quando um nó passa de 4 chaves, ele se divide em dois: numa folha, sobe para o pai uma cópia da primeira chave da nova folha; num nó interno, sobe a chave do meio. A árvore só cresce pela raiz, então todas as folhas ficam sempre no mesmo nível.
+Escolhemos a B+ porque o Módulo 2 pede busca por prefixo, e as consultas por intervalo de datas precisam dos dados em ordem. A hash não serve para isso: ela espalha os dados pelas posições, e textos parecidos caem em lugares sem relação nenhuma. A B+ mantém tudo em ordem, então os textos que começam com o mesmo prefixo ficam lado a lado.
 
-| Decisão | Justificativa |
-|---|---|
-| Árvore B+ para tipo, região e data | o Módulo 2 pede busca por prefixo, e as consultas por intervalo de datas precisam de ordem. A Tabela Hash espalha os dados e não consegue fazer isso. A B+ mantém tudo em ordem |
-| **B+** (e não a árvore B comum) | com as folhas encadeadas, uma busca por prefixo ou por intervalo desce uma vez até a primeira chave e depois só anda pelas folhas. Na árvore B, os dados também ficam nos nós internos, e seria preciso subir e descer pela árvore |
-| Chave **(texto, id)** | várias ocorrências têm o mesmo tipo ou a mesma região. O id desempata, então cada entrada é única, e a remoção apaga exatamente a ocorrência certa |
-| **Ordem m = 4** (no máximo 4 chaves e 5 filhos por nó) | com 150 ocorrências, a árvore fica com 4 níveis, e as divisões de nós acontecem de verdade. Com ordens grandes, a árvore teria só a raiz e as folhas. O valor é uma constante (`ORDEM`) e pode ser alterado |
-| **Remoção sem rebalanceamento** | a remoção tira a chave da folha, sem juntar nós com os vizinhos. As buscas continuam corretas, porque as chaves dos nós internos continuam indicando o caminho. O custo é que algumas folhas podem ficar com poucas chaves. O rebalanceamento completo é a parte mais complexa da B+ e não muda o resultado das buscas |
+Escolhemos a B+, e não a árvore B comum, porque na B+ os dados ficam só nas folhas, e as folhas são ligadas em sequência. Para buscar um prefixo ou um intervalo, a árvore desce uma vez até o primeiro resultado e depois só anda pelas folhas para o lado. Na árvore B, os dados também ficam nos nós internos, e seria preciso subir e descer pela árvore para percorrer um intervalo.
+
+Cada entrada da árvore é um par (texto, id), e a ocorrência completa continua só na hash. Guardamos o id junto porque muitas ocorrências têm o mesmo tipo ou a mesma região (14 são de NORRISTOWN, por exemplo): o id desempata, cada entrada fica única, e a remoção apaga exatamente a ocorrência certa.
+
+Usamos ordem m = 4, ou seja, cada nó guarda no máximo 4 chaves. Quando um nó passa disso, ele se divide em dois: numa folha, sobe para o pai uma cópia da primeira chave da nova folha; num nó interno, sobe a chave do meio. A árvore só cresce pela raiz, então todas as folhas ficam sempre no mesmo nível. Escolhemos uma ordem pequena porque, com 150 ocorrências, a árvore fica com 4 níveis e as divisões acontecem de verdade; com uma ordem grande, ela teria só a raiz e as folhas.
+
+A data fica guardada como texto no formato `AAAA-MM-DD hh:mm:ss`. Como todas as datas têm o mesmo tamanho e zeros à esquerda, a ordem alfabética é a mesma ordem do tempo, e a data serve direto como chave da árvore.
+
+Na remoção, decidimos tirar a chave da folha sem rebalancear a árvore. As buscas continuam corretas, porque as chaves dos nós internos continuam indicando o caminho certo; o custo é que algumas folhas podem ficar com poucas chaves. Fizemos assim porque o rebalanceamento completo é a parte mais complexa da B+ e não muda o resultado das buscas.
 
 ### Algoritmo Guloso (`src/greedy.c`)
 
-**Onde é usado:** no Módulo 5 (Operação Resgate), para definir a ordem de atendimento.
+Usamos o Algoritmo Guloso no Módulo 5, para decidir em que ordem uma equipe deve atender as ocorrências.
 
-**Como funciona:**
+Escolhemos um guloso porque testar todas as ordens possíveis é impossível: com 150 ocorrências, são 150! ordens. O guloso decide um passo de cada vez: dentre as ocorrências que faltam, escolhe a melhor naquele momento, vai até ela e não volta atrás. Assim a resposta sai na hora, e o sistema mostra o motivo de cada escolha, que é o que uma central de emergência precisa.
 
-1. Os **candidatos** são as ocorrências que atendem às restrições informadas: região (encontrada pela Árvore B+) e/ou categoria (EMS, Fire ou Traffic).
-2. A equipe sai da **base em Norristown**, a sede do condado.
-3. **A cada passo, o algoritmo escolhe a melhor ocorrência entre as que faltam**, segundo o critério escolhido, vai até ela e não volta atrás.
-4. Ele para quando todas foram atendidas ou quando a próxima escolhida ultrapassaria o **limite de quilômetros** que a equipe pode percorrer.
-5. Cada linha da ordem mostra **o motivo da escolha** e a distância percorrida.
+A equipe sai de Norristown, a sede do condado de Montgomery, de onde vêm as chamadas. Antes de começar, o usuário pode restringir as ocorrências a uma região, porque uma equipe normalmente cobre uma área; a busca pela região usa a Árvore B+.
 
-**Critérios de prioridade:**
+Criamos dois critérios para decidir qual é a melhor ocorrência a cada passo:
 
-| Critério | Escolhe primeiro | Em caso de empate |
-|---|---|---|
-| 1 – Mais antiga | a ocorrência aberta há mais tempo (maior espera) | — |
-| 2 – Mais próxima | a mais perto de onde a equipe está agora (vizinho mais próximo) | a mais antiga |
-| 3 – Combinado | a categoria mais urgente: **EMS** (risco à vida), depois **Fire**, depois **Traffic** | a mais antiga |
+- **Mais próxima.** Escolhe a ocorrência mais perto de onde a equipe está agora; depois de atendê-la, a próxima é a mais perto desse novo ponto (vizinho mais próximo). Escolhemos esse critério porque, em emergência, o tempo de chegada importa: indo sempre para a mais próxima, a equipe gasta menos estrada entre um atendimento e outro.
+- **Combinado: categoria e, no empate, a mais próxima.** Atende primeiro as ocorrências EMS, depois as Fire e depois as Traffic; entre as da mesma categoria, a mais próxima. Essa ordem é uma decisão nossa: EMS é emergência médica, com risco direto à vida; Fire tem risco à vida e ao patrimônio, mas muitos chamados são alarmes; Traffic, na maioria, não tem vítima grave (quando tem, o dataset registra também um chamado EMS). Criamos este critério porque o enunciado pede para combinar mais de um critério: ele junta a urgência da categoria com a distância.
 
-| Decisão | Justificativa |
-|---|---|
-| Algoritmo guloso | numa central, a decisão precisa ser rápida e explicável: cada escolha é a melhor naquele momento, pelo critério declarado, e o sistema mostra o motivo |
-| Parar no limite de km, em vez de pular para uma ocorrência mais perto | respeita a ordem do critério: uma ocorrência menos prioritária não passa à frente de uma mais prioritária |
-| Distância aproximada: 1 grau de latitude = 111 km e 1 grau de longitude = 85 km, somando os deslocamentos norte-sul e leste-oeste | na latitude do condado (cerca de 40 graus), 1 grau de longitude mede 111 × cos(40°) ≈ 85 km. A soma dos dois eixos se aproxima de um deslocamento por ruas, e não usa nenhuma biblioteca |
-| Limitação conhecida | o guloso não garante a melhor solução global: o vizinho mais próximo, por exemplo, não garante o menor percurso total. Em troca, é simples e rápido (O(n²) para n candidatos) |
+O usuário também informa um limite de quilômetros, que representa o recurso da equipe (combustível ou tempo de turno). Quando a próxima ocorrência escolhida não cabe no limite, o algoritmo para. Decidimos parar, em vez de pular para outra que coubesse, porque pular quebraria o critério: no critério combinado, por exemplo, uma ocorrência de trânsito passaria na frente de uma emergência médica só por estar mais perto.
+
+Para medir a distância, usamos uma aproximação: 1 grau de latitude vale cerca de 111 km, e 1 grau de longitude, na latitude do condado (cerca de 40 graus), vale 111 × cos(40°) ≈ 85 km. Somamos o deslocamento norte-sul com o leste-oeste, sem cortar em diagonal, porque uma equipe anda por ruas, e não em linha reta. A conta fica só com soma e multiplicação, sem biblioteca.
+
+O guloso tem uma limitação que conhecemos: ele não garante a melhor ordem possível. Achar o menor percurso que passa por todas as ocorrências é o problema do caixeiro-viajante, que não tem solução rápida conhecida. Trocamos a resposta perfeita por uma resposta boa, imediata e explicável, com O(n²) comparações para n ocorrências.
 
 ## Módulos
 
@@ -209,14 +202,14 @@ A amostra não tem duplicatas. Para demonstrar a detecção, basta cadastrar pel
 
 | Exigência | Como é atendida |
 |---|---|
-| selecionar ocorrências de acordo com restrições | restrição por região e/ou categoria |
+| selecionar ocorrências de acordo com restrições | restrição por região |
 | estabelecer uma ordem de atendimento | Algoritmo Guloso |
-| considerar diferentes critérios de prioridade | mais antiga e mais próxima |
-| combinar mais de um critério | critério combinado: categoria e antiguidade |
+| considerar diferentes critérios de prioridade | mais próxima e categoria |
+| combinar mais de um critério | critério combinado: categoria e distância |
 | limite de tempo ou recurso | limite de quilômetros que a equipe pode percorrer |
 | decisões justificáveis | cada escolha mostra o motivo e a distância |
 
-Os critérios sugeridos pelo enunciado de nível de prioridade, quantidade de pessoas e tempo estimado não existem no dataset. Por isso, o grupo usou os critérios que os dados permitem: **região**, **tipo** (categoria), **data/hora de abertura** (tempo de espera) e **localização** (distância até a equipe).
+Os critérios sugeridos pelo enunciado de nível de prioridade, quantidade de pessoas e tempo estimado não existem no dataset. Por isso, o grupo usou os critérios que os dados permitem: **região**, **tipo** (categoria) e **localização** (distância até a equipe).
 
 ## Bibliotecas utilizadas
 
